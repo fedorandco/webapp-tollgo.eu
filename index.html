@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>tollgo.eu - Vignete rutiere în Europa</title>
+  <meta name="description" content="tollgo.eu te ajută să găsești și să cumperi vignete rutiere pentru 8 țări europene, printr-un serviciu independent de intermediere.">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    :root {
+      --primary: #13294b;
+      --accent: #1a73e8;
+      --bg: #f5f7fa;
+      --card: #ffffff;
+      --text: #1d2433;
+      --muted: #5b6475;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    header { background: var(--primary); color: #fff; padding: 18px 16px; }
+    header .wrap { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    header .logo { font-weight: 700; font-size: 1.3rem; text-decoration: none; color: #fff; }
+    header nav a { color: #dbe4f5; margin-left: 16px; text-decoration: none; font-size: 0.95rem; }
+    .langs { display: flex; gap: 4px; flex-wrap: wrap; width: 100%; justify-content: flex-end; }
+    .lang-btn { background: transparent; border: 1px solid #3b4f73; color: #dbe4f5; border-radius: 6px; padding: 3px 8px; font: inherit; font-size: 0.8rem; cursor: pointer; }
+    .lang-btn.active { background: #fff; color: var(--primary); border-color: #fff; font-weight: 700; }
+    .wrap { max-width: 1000px; margin: 0 auto; padding: 0 16px; }
+    .hero { text-align: center; padding: 56px 16px 32px; }
+    .hero h1 { font-size: 2.2rem; margin: 0 0 12px; color: var(--primary); }
+    .hero p { color: var(--muted); font-size: 1.1rem; max-width: 640px; margin: 0 auto; }
+    .hero-list { list-style: none; padding: 0; margin: 16px auto 0; display: inline-block; text-align: left; color: var(--primary); font-weight: 600; }
+    .hero-list li { padding-left: 22px; position: relative; margin-bottom: 4px; }
+    .hero-list li::before { content: "✓"; position: absolute; left: 0; color: var(--accent); }
+    h2 { color: var(--primary); margin: 40px 0 16px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+    .card { background: var(--card); border-radius: 12px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.08); display: flex; flex-direction: column; }
+    .card h3 { margin: 0 0 6px; font-size: 1.15rem; color: var(--primary); display: flex; align-items: center; }
+    .card .info { color: var(--muted); font-size: 0.92rem; flex: 1; }
+    .card .periods { font-size: 0.88rem; color: var(--primary); margin-top: 6px; }
+    .card .price { margin: 12px 0 4px; font-weight: 600; }
+    .card .verify { display: inline-block; margin-top: 10px; font-size: 0.9rem; color: var(--accent); text-decoration: underline; }
+    .card .btn { display: inline-block; margin-top: 12px; padding: 10px 14px; background: var(--accent); color: #fff; border-radius: 8px; text-decoration: none; text-align: center; border: 0; font: inherit; cursor: pointer; }
+    .how { background: #f3f0e9; border-radius: 16px; padding: 32px 28px; }
+    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 28px; }
+    .step-num { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: #22c55e; color: #0b1f12; font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 700; font-size: 0.95rem; }
+    .step h3 { margin: 16px 0 10px; font-size: 1.15rem; color: var(--text); }
+    .step p { margin: 0; color: var(--muted); }
+    .faq details { background: var(--card); border-radius: 10px; padding: 14px 18px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    .faq summary { cursor: pointer; font-weight: 600; }
+    .faq p { color: var(--muted); margin: 10px 0 0; }
+    .notice { background: #fff8e1; border: 1px solid #f0d878; border-radius: 10px; padding: 14px 18px; margin: 32px 0; font-size: 0.93rem; }
+    .notice img { height: 48px; width: auto; display: inline-block; vertical-align: middle; margin-right: 10px; }
+    #map { height: 340px; border-radius: 12px; background: #dbe7f5; box-shadow: 0 2px 6px rgba(0,0,0,.08); margin-bottom: 8px; }
+    .map-legend { font-size: 0.9rem; color: var(--muted); margin: 0 0 8px; }
+    .map-error { padding: 16px; background: #fff; border-radius: 12px; }
+    .flag { width: 30px; height: 20px; border: 1px solid #d0d7e2; border-radius: 2px; vertical-align: middle; margin-right: 8px; flex: none; }
+    .tip { display: flex; align-items: center; gap: 6px; }
+    .tip .flag { margin-right: 0; }
+    dialog.buy-dialog { border: 0; border-radius: 14px; padding: 24px; width: min(440px, calc(100vw - 32px)); box-shadow: 0 10px 30px rgba(0,0,0,.2); color: var(--text); }
+    dialog.buy-dialog::backdrop { background: rgba(19,41,75,.55); }
+    .buy-dialog h2 { margin: 0 0 14px; color: var(--primary); font-size: 1.25rem; }
+    .buy-dialog label { display: block; font-weight: 600; font-size: 0.92rem; margin-bottom: 14px; }
+    .buy-dialog input[type="text"], .buy-dialog input[type="email"], .buy-dialog input[type="date"], .buy-dialog select { display: block; width: 100%; margin-top: 6px; padding: 10px; font: inherit; border: 1px solid #c9d1de; border-radius: 8px; background: #fff; }
+    #plate { text-transform: uppercase; }
+    .buy-dialog .check { font-weight: 400; display: flex; gap: 8px; align-items: flex-start; }
+    .buy-dialog .check input { margin-top: 4px; }
+    .buy-dialog .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
+    .buy-dialog .btn { display: inline-block; padding: 10px 14px; background: var(--accent); color: #fff; border: 0; border-radius: 8px; text-decoration: none; font: inherit; cursor: pointer; }
+    .btn-ghost { background: none; border: 1px solid #c9d1de; border-radius: 8px; padding: 10px 14px; font: inherit; cursor: pointer; color: var(--text); }
+    .form-error { color: #b42318; font-size: 0.92rem; font-weight: 600; margin: 0 0 8px; }
+    .test-note { font-size: 0.85rem; color: var(--muted); margin-top: 14px; }
+    .site-footer { background: #03304f; color: #b9c9dc; font-size: 0.88rem; text-align: center; padding: 48px 0 40px; margin-top: 48px; }
+    .site-footer .cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px 28px; text-align: left; padding-bottom: 28px; margin-bottom: 28px; border-bottom: 1px solid rgba(255,255,255,.18); }
+    .site-footer .cta h2 { color: #fff; margin: 0 0 6px; font-size: 1.5rem; }
+    .site-footer .cta p { margin: 0; max-width: 560px; }
+    .cta-btn { display: inline-block; background: #22c55e; color: #0b1f12; font-weight: 700; text-decoration: none; padding: 14px 24px; border-radius: 10px; white-space: nowrap; }
+    .cta-btn:hover { background: #4ade80; }
+    .site-footer .logo-box { display: block; width: fit-content; margin: 0 auto 24px; background: #fff; border-radius: 10px; padding: 8px 14px; }
+    .site-footer .logo-box img { height: 66px; width: auto; display: block; }
+    .legal-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 22px; border-top: 1px solid rgba(255,255,255,.18); padding-top: 22px; margin-bottom: 22px; }
+    .legal-links a { color: #e6edf6; text-decoration: none; font-size: 0.95rem; }
+    .legal-links a::before { content: "› "; color: #7fa3c7; }
+    .legal-links a:hover { text-decoration: underline; }
+    .site-footer p { margin: 8px 0; }
+    .site-footer .anpc-box { display: inline-block; border: 1px solid rgba(255,255,255,.3); border-radius: 10px; padding: 10px 16px; margin-top: 18px; }
+    .site-footer .anpc-box a { color: #fff; font-weight: 600; }
+    @media (max-width: 600px) { .cta-btn { width: 100%; text-align: center; white-space: normal; } }
+    @media (max-width: 600px) { #map { height: 260px; } header nav { display: none; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <a class="logo" href="#"><img src="logo.jpg" alt="tollgo.eu - European road toll & vignettes" data-i18n-attr="alt:logoAlt" style="height:66px;max-width:100%;width:auto;display:block;background:#fff;border-radius:8px;padding:6px 12px;"></a>
+      <nav>
+        <a href="#tari" data-i18n="navCountries">Țări</a>
+        <a href="#cum" data-i18n="navHow">Cum funcționează</a>
+        <a href="#intrebari" data-i18n="navFaq">Întrebări</a>
+      </nav>
+      <div class="langs" role="group" aria-label="Language">
+        <button type="button" class="lang-btn" data-lang="ro">RO</button>
+        <button type="button" class="lang-btn" data-lang="de">DE</button>
+        <button type="button" class="lang-btn" data-lang="cs">CS</button>
+        <button type="button" class="lang-btn" data-lang="sk">SK</button>
+        <button type="button" class="lang-btn" data-lang="hu">HU</button>
+        <button type="button" class="lang-btn" data-lang="sl">SL</button>
+        <button type="button" class="lang-btn" data-lang="bg">BG</button>
+        <button type="button" class="lang-btn" data-lang="en">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="wrap">
+      <h1 data-i18n="heroTitle">Vignete rutiere în Europa, fără bătăi de cap</h1>
+      <p data-i18n="heroText">Cumpără vignete electronice de la furnizorii oficiali pentru Austria, Cehia, Ungaria, Elveția și altele în mai puțin de un minut. Fără cozi la benzinării, fără autocolante pe parbriz, fără amenzi.</p>
+      <ul class="hero-list">
+        <li data-i18n="heroL1">Valabilă în câteva minute</li>
+        <li data-i18n="heroL2">Înregistrată pe numărul tău</li>
+      </ul>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <h2 id="tari" data-i18n="countriesTitle">Țări acoperite</h2>
+    <div id="map" aria-label="Europe map"></div>
+    <p id="mapError" class="map-error" hidden data-i18n="mapError">Harta nu s-a putut încărca. Lista de mai jos rămâne disponibilă.</p>
+    <p class="map-legend" data-i18n="mapLegend">Apasă pe o țară evidențiată (albastru) pentru a vedea vigneta.</p>
+
+    <h2 data-i18n="listTitle">Lista țărilor</h2>
+    <div class="grid">
+      <div class="card" data-iso="AUT">
+        <h3></h3>
+        <div class="info"></div>
+        <div class="periods"></div>
+        <div class="price"></div>
+        <button type="button" class="btn buy-btn" data-url=""></button>
+      </div>
+      <div class="card" data-iso="CZE">
+        <h3></h3>
+        <div class="info"></div>
+        <div class="periods"></div>
+        <div class="price"></div>
+        <button type="button" class="btn buy-btn" data-url=""></button>
+      </div>
+      <div class="card" data-iso="SVK">
+        <h3></h3>
+        <div class="info"></div>
+        <div class="periods"></div>
+        <div class="price"></div>
+        <button type="button" class="btn buy-btn" data-url=""></button>
+      </div>
+      <div class="card" data-iso="HUN">
+        <h3></h3>
+        <div class="info"></div>
+        <div class="periods"></div>
+        <div class="price"></div>
+        <button type="button" class="btn buy-btn" data-url=""></button>
+      </div>
+      <div class="card" data-iso="SVN">
+        <h3></h3>
+        <div class="info"></div>
+        <div class="periods"></div>
+        <div class="price"></div>
+        <button type="button" class="btn buy-btn" data-url=""></button>
+      </div>
+      <div class="card" data-iso="CHE">
+        <h3></h3>
+        <div class="info"></div>
+        <div class="periods"></div>
+        <div class="price"></div>
+        <button type="button" class="btn buy-btn" data-url=""></button>
+      </div>
+      <div class="card" data-iso="BGR">
+        <h3></h3>
+        <div class="info"></div>
+        <div class="periods"></div>
+        <div class="price"></div>
+        <button type="button" class="btn buy-btn" data-url=""></button>
+      </div>
+      <div class="card" data-iso="ROU">
+        <h3></h3>
+        <div class="info"></div>
+        <div class="periods"></div>
+        <div class="price"></div>
+        <button type="button" class="btn buy-btn" data-url=""></button>
+      </div>
+    </div>
+
+    <div class="notice">
+      <img src="logo.jpg" alt="tollgo.eu" data-i18n-attr="alt:logoAlt">
+      <strong data-i18n="noticeLabel">Important:</strong> <span data-i18n="noticeBody">tollgo.eu este un serviciu independent de intermediere. Nu suntem afiliați cu autoritățile rutiere sau cu operatorii naționali de drumuri. Prețurile afișate sunt orientative și pot fi modificate de furnizorul oficial. Verifică întotdeauna prețul și condițiile înainte de cumpărare.</span>
+    </div>
+
+    <h2 id="cum" data-i18n="howTitle">Cum funcționează</h2>
+    <div class="how">
+      <div class="steps">
+        <div class="step">
+          <span class="step-num">01</span>
+          <h3 data-i18n="step1Title">Alege țările</h3>
+          <p data-i18n="step1Text">Alege unde mergi și pentru cât timp. Îți arătăm opțiunile de vignetă pentru fiecare țară, de la furnizorii oficiali.</p>
+        </div>
+        <div class="step">
+          <span class="step-num">02</span>
+          <h3 data-i18n="step2Title">Introdu numărul</h3>
+          <p data-i18n="step2Text">Vigneta este asociată electronic cu numărul și țara de înmatriculare. Nimic de lipit pe parbriz.</p>
+        </div>
+        <div class="step">
+          <span class="step-num">03</span>
+          <h3 data-i18n="step3Title">Plătește și pornește</h3>
+          <p data-i18n="step3Text">Plătești cu cardul, Apple Pay sau Google Pay, la furnizorul oficial. Confirmarea vine de la acesta, gata de prezentat la control.</p>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="intrebari" data-i18n="faqTitle">Întrebări frecvente</h2>
+    <div class="faq">
+      <details><summary data-i18n="faq1Q"></summary><p data-i18n="faq1A"></p></details>
+      <details><summary data-i18n="faq2Q"></summary><p data-i18n="faq2A"></p></details>
+      <details><summary data-i18n="faq3Q"></summary><p data-i18n="faq3A"></p></details>
+      <details><summary data-i18n="faq4Q"></summary><p data-i18n="faq4A"></p></details>
+      <details><summary data-i18n="faq5Q"></summary><p data-i18n="faq5A"></p></details>
+      <details><summary data-i18n="faq6Q"></summary><p data-i18n="faq6A"></p></details>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="cta">
+        <div>
+          <h2 data-i18n="ctaTitle">Pleci în călătorie? Ia-ți vigneta din timp.</h2>
+          <p data-i18n="ctaText">Alege țara pe hartă și completează datele vehiculului. Verifică țara și perioada înainte de plată.</p>
+        </div>
+        <a class="cta-btn" href="#map" data-i18n="ctaButton">Cumpără vigneta</a>
+      </div>
+      <span class="logo-box"><img src="logo.jpg" alt="tollgo.eu"></span>
+      <nav class="legal-links" aria-label="Legal">
+        <a href="#protectia-datelor" data-i18n="legal1">Protecția datelor și declarația privind protecția datelor</a>
+        <a href="#termeni" data-i18n="legal2">Termeni și condiții generale</a>
+        <a href="#revocare" data-i18n="legal3">Revocare &amp; drept de retragere</a>
+        <a href="#date-identificare" data-i18n="legal4">Date de identificare ale firmei</a>
+        <a href="#informatii-consumatori" data-i18n="legal5">Informații pentru consumatori</a>
+        <a href="#protectia-anularii" data-i18n="legal6">Informații despre protecția anulării</a>
+        <a href="#newsletter" data-i18n="legal7">Newsletter</a>
+      </nav>
+      <p data-i18n="copyright">© 2026 tollgo.eu. Toate drepturile rezervate.</p>
+      <p data-i18n="contactLine">Pentru întrebări sau reclamații, scrie-ne la adresa de contact [de completat].</p>
+      <p class="anpc-box"><span data-i18n="consumerLabel">Protecția consumatorilor:</span> <a href="https://www.anpc.ro/" target="_blank" rel="noopener">ANPC – Autoritatea Națională pentru Protecția Consumatorilor</a></p>
+    </div>
+  </footer>
+
+  <dialog id="buyDialog" class="buy-dialog" aria-labelledby="buyTitle">
+    <form id="buyForm" novalidate>
+      <h2 id="buyTitle">Vignetă</h2>
+      <label><span data-i18n="fPeriod">Perioada</span>
+        <select id="period"></select>
+      </label>
+      <label><span data-i18n="fStart">Valabilă de la data</span>
+        <input id="startDate" type="date">
+      </label>
+      <label><span data-i18n="fReg">Țara de înmatriculare</span>
+        <select id="regCountry"></select>
+      </label>
+      <label><span data-i18n="fPlate">Numărul de înmatriculare</span>
+        <input id="plate" type="text" maxlength="15" autocomplete="off" autocapitalize="characters" data-i18n-attr="placeholder:plateHint" placeholder="ex: B 123 ABC">
+      </label>
+      <label><span data-i18n="fEmail">E-mail pentru confirmare</span>
+        <input id="email" type="email" autocomplete="email" data-i18n-attr="placeholder:emailHint" placeholder="nume@exemplu.ro">
+      </label>
+      <label class="check">
+        <input id="agree" type="checkbox">
+        <span><span data-i18n="agreePre">Confirm că am completat corect datele și sunt de acord cu </span><a href="#termeni" data-i18n="agreeLink">termenii și condițiile</a><span data-i18n="agreePost">.</span></span>
+      </label>
+      <p class="form-error" id="formError" hidden></p>
+      <div class="actions">
+        <button type="button" class="btn-ghost close-dialog" data-i18n="btnCancel">Renunță</button>
+        <button type="submit" class="btn" data-i18n="btnContinue">Continuă</button>
+      </div>
+    </form>
+
+    <div id="buyResult" hidden>
+      <h2 data-i18n="verifyTitle">Verifică datele</h2>
+      <p><span data-i18n="resCountry">Vignetă pentru:</span> <strong id="resCountry"></strong><br>
+         <span data-i18n="resPeriod">Perioada:</span> <strong id="resPeriod"></strong><br>
+         <span data-i18n="resStart">Valabilă de la:</span> <strong id="resStart"></strong><br>
+         <span data-i18n="resReg">Țara de înmatriculare:</span> <strong id="resReg"></strong><br>
+         <span data-i18n="resPlate">Numărul:</span> <strong id="resPlate"></strong><br>
+         <span data-i18n="resEmail">E-mail:</span> <strong id="resEmail"></strong></p>
+      <div id="resAction"></div>
+      <p class="test-note" data-i18n="testNote">Versiune de test: datele nu sunt salvate și nu se trimite niciun e-mail de confirmare.</p>
+      <div class="actions">
+        <button type="button" class="btn-ghost" id="editBuy" data-i18n="editBtn">Modifică</button>
+        <button type="button" class="btn-ghost close-dialog" data-i18n="closeBtn">Închide</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="lang.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const LANGS = ["ro", "de", "cs", "sk", "hu", "sl", "bg", "en"];
+
+    // Codurile ISO-3 (harta) -> ISO-2 (afișarea numelui în limba aleasă)
+    const ISO2 = { AUT: "AT", CZE: "CZ", SVK: "SK", HUN: "HU", SVN: "SI", CHE: "CH", BGR: "BG", ROU: "RO" };
+
+    // Țările care pot fi alese ca țară de înmatriculare
+    const REG_CODES = ["AL","AD","AT","BY","BE","BA","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR","HU","IS","IE","IT","LV","LI","LT","LU","MT","MD","MC","ME","NL","MK","NO","PL","PT","RO","SM","RS","SK","SI","ES","SE","CH","UA","GB","VA"];
+
+    // Perioadele de valabilitate pentru fiecare țară (surse: revânzători, de verificat la operatorii oficiali)
+    const PERIODS = {
+      AUT: ["d1", "d10", "m2", "y1"],
+      CZE: ["d1", "d10", "m1", "y1"],
+      SVK: ["d1", "d10", "m1", "y1"],
+      HUN: ["d1", "d10", "m1", "y1"],
+      SVN: ["d7", "m1", "y1"],
+      CHE: ["y1"],
+      BGR: ["d1", "wknd", "d7", "m1", "m3", "y1"],
+      ROU: ["d1", "d10", "m1", "d60", "y1"]
+    };
+
+    // Cu câte zile în avans poate începe fiecare perioadă, la achiziția online
+    // Austria: 2 luni și 1 an încep cel mai devreme în a 18-a zi (sursă: revânzător, de verificat oficial)
+    const PERIOD_MIN_DAYS = { AUT: { m2: 18, y1: 18 } };
+    const MAX_DAYS_AHEAD = 30;
+
+    // Pagini oficiale de verificare după numărul de înmatriculare (doar cele confirmate)
+    const VERIFY_URLS = {
+      AUT: "https://evidenz.asfinag.at/de/",
+      CZE: "https://edalnice.gov.cz/en",
+      HUN: "https://e-autopalyamatrica.hu/en/ervenyesseg-lekerdezes",
+      SVN: "https://evinjeta.dars.si"
+    };
+
+    // Steaguri simplificate, desenate în SVG (fără stemele Sloveniei și Slovaciei)
+    const FLAG_PARTS = {
+      AUT: '<rect width="30" height="20" fill="#ED2939"/><rect y="6.67" width="30" height="6.66" fill="#fff"/>',
+      CZE: '<rect width="30" height="10" fill="#fff"/><rect y="10" width="30" height="10" fill="#D7141A"/><polygon points="0,0 15,10 0,20" fill="#11457E"/>',
+      SVK: '<rect width="30" height="6.67" fill="#fff"/><rect y="6.67" width="30" height="6.66" fill="#0B4EA2"/><rect y="13.33" width="30" height="6.67" fill="#EE1C25"/>',
+      HUN: '<rect width="30" height="6.67" fill="#CE2939"/><rect y="6.67" width="30" height="6.66" fill="#fff"/><rect y="13.33" width="30" height="6.67" fill="#477050"/>',
+      SVN: '<rect width="30" height="6.67" fill="#fff"/><rect y="6.67" width="30" height="6.66" fill="#005DA4"/><rect y="13.33" width="30" height="6.67" fill="#ED1C24"/>',
+      CHE: '<rect width="30" height="20" fill="#D52B1E"/><rect x="12.5" y="4" width="5" height="12" fill="#fff"/><rect x="9" y="7.5" width="12" height="5" fill="#fff"/>',
+      BGR: '<rect width="30" height="6.67" fill="#fff"/><rect y="6.67" width="30" height="6.66" fill="#00966E"/><rect y="13.33" width="30" height="6.67" fill="#D62612"/>',
+      ROU: '<rect width="10" height="20" fill="#002B7F"/><rect x="10" width="10" height="20" fill="#FCD116"/><rect x="20" width="10" height="20" fill="#CE1126"/>'
+    };
+    function flagSvg(iso) {
+      return `<svg class="flag" viewBox="0 0 30 20" aria-hidden="true">${FLAG_PARTS[iso]}</svg>`;
+    }
+
+    // ---------- Limbă ----------
+    function detectLang() {
+      let saved = null;
+      try { saved = localStorage.getItem("tollgo_lang"); } catch (e) {}
+      if (saved && LANGS.includes(saved)) return saved;
+      const browser = (navigator.language || "en").slice(0, 2).toLowerCase();
+      return LANGS.includes(browser) ? browser : "en";
+    }
+    let lang = detectLang();
+
+    function t(key, vars) {
+      let s = (I18N[lang] && I18N[lang][key]) || I18N.en[key] || I18N.ro[key] || key;
+      if (vars) Object.keys(vars).forEach(k => { s = s.replace("{" + k + "}", vars[k]); });
+      return s;
+    }
+
+    function regionName(code2) {
+      try { return new Intl.DisplayNames([lang], { type: "region" }).of(code2); }
+      catch (e) { return code2; }
+    }
+    function countryName(iso3) {
+      return regionName(ISO2[iso3]);
+    }
+
+    function applyStatic() {
+      document.documentElement.lang = lang;
+      document.title = t("pageTitle");
+      document.querySelector('meta[name="description"]').setAttribute("content", t("metaDesc"));
+      document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+      document.querySelectorAll("[data-i18n-attr]").forEach(el => {
+        el.dataset.i18nAttr.split(";").forEach(pair => {
+          const [attr, key] = pair.split(":");
+          el.setAttribute(attr, t(key));
+        });
+      });
+      document.querySelectorAll(".lang-btn").forEach(b => b.classList.toggle("active", b.dataset.lang === lang));
+    }
+
+    // ---------- Carduri ----------
+    function renderCards() {
+      document.querySelectorAll(".card").forEach(card => {
+        const iso = card.dataset.iso;
+        card.querySelector("h3").innerHTML = flagSvg(iso) + " " + countryName(iso);
+        card.querySelector(".info").textContent = t("info_" + iso);
+        card.querySelector(".periods").textContent = t("periodsLabel") + " " + PERIODS[iso].map(k => t(k)).join(", ");
+        card.querySelector(".price").textContent = t("priceLabel");
+        const btn = card.querySelector(".buy-btn");
+        btn.textContent = t("buyBtn");
+
+        let a = card.querySelector(".verify");
+        if (VERIFY_URLS[iso]) {
+          if (!a) {
+            a = document.createElement("a");
+            a.className = "verify";
+            a.target = "_blank";
+            a.rel = "noopener";
+            card.insertBefore(a, btn);
+          }
+          a.href = VERIFY_URLS[iso];
+          a.textContent = t("verifyBtn");
+        } else if (a) {
+          a.remove();
+        }
+      });
+    }
+
+    // ---------- Formular ----------
+    const dlg = document.getElementById("buyDialog");
+    const form = document.getElementById("buyForm");
+    const formError = document.getElementById("formError");
+    const emailInput = document.getElementById("email");
+    const regSel = document.getElementById("regCountry");
+    const perSel = document.getElementById("period");
+    const startInput = document.getElementById("startDate");
+    let currentIso = null;
+
+    function dateISO(offsetDays) {
+      const d = new Date();
+      d.setDate(d.getDate() + offsetDays);
+      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+      return d.toISOString().slice(0, 10);
+    }
+    function formatDate(iso) {
+      return iso.split("-").reverse().join(".");
+    }
+
+    function fillRegOptions() {
+      const prev = regSel.value;
+      regSel.innerHTML = "";
+      regSel.add(new Option(t("chooseCountry"), ""));
+      REG_CODES
+        .map(c => ({ c, n: regionName(c) }))
+        .sort((a, b) => a.n.localeCompare(b.n, lang))
+        .forEach(o => regSel.add(new Option(o.n, o.c)));
+      regSel.value = prev;
+    }
+
+    function fillPeriodOptions() {
+      const prev = perSel.value;
+      perSel.innerHTML = "";
+      (PERIODS[currentIso] || []).forEach(k => perSel.add(new Option(t(k), k)));
+      if ([...perSel.options].some(o => o.value === prev)) perSel.value = prev;
+    }
+
+    function updateDialogTitle() {
+      document.getElementById("buyTitle").textContent = t("dialogTitle", { c: countryName(currentIso) });
+    }
+
+    function updateDateLimits() {
+      const minDays = (PERIOD_MIN_DAYS[currentIso] || {})[perSel.value] || 0;
+      startInput.min = dateISO(minDays);
+      startInput.max = dateISO(MAX_DAYS_AHEAD);
+      if (startInput.value && (startInput.value < startInput.min || startInput.value > startInput.max)) {
+        startInput.value = "";
+      }
+    }
+    perSel.addEventListener("change", updateDateLimits);
+
+    function openForm(iso) {
+      currentIso = iso;
+      updateDialogTitle();
+      fillPeriodOptions();
+      form.reset();
+      fillRegOptions();
+      form.hidden = false;
+      document.getElementById("buyResult").hidden = true;
+      formError.hidden = true;
+      updateDateLimits();
+      dlg.showModal();
+    }
+
+    document.querySelectorAll(".close-dialog").forEach(b => b.addEventListener("click", () => dlg.close()));
+    document.getElementById("editBuy").addEventListener("click", () => {
+      form.hidden = false;
+      document.getElementById("buyResult").hidden = true;
+    });
+
+    document.querySelectorAll(".buy-btn").forEach(btn => {
+      btn.addEventListener("click", () => openForm(btn.closest(".card").dataset.iso));
+    });
+
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+      const plate = document.getElementById("plate").value.trim().toUpperCase();
+      const reg = regSel.value;
+      const email = emailInput.value.trim();
+      const agree = document.getElementById("agree").checked;
+      const start = startInput.value;
+
+      let msg = "";
+      if (!start) msg = t("errDate");
+      else if (start < startInput.min || start > startInput.max) {
+        msg = t("errDateRange", { a: formatDate(startInput.min), b: formatDate(startInput.max) });
+      }
+      else if (!reg) msg = t("errCountry");
+      else if (!/^[A-Z0-9][A-Z0-9 -]{1,13}[A-Z0-9]$/.test(plate)) msg = t("errPlate");
+      else if (!emailInput.checkValidity()) msg = t("errEmail");
+      else if (!agree) msg = t("errAgree");
+      if (msg) {
+        formError.textContent = msg;
+        formError.hidden = false;
+        return;
+      }
+      formError.hidden = true;
+
+      document.getElementById("resCountry").textContent = countryName(currentIso);
+      document.getElementById("resPeriod").textContent = perSel.options[perSel.selectedIndex].text;
+      document.getElementById("resStart").textContent = formatDate(start);
+      document.getElementById("resReg").textContent = regionName(reg);
+      document.getElementById("resPlate").textContent = plate;
+      document.getElementById("resEmail").textContent = email;
+
+      const card = document.querySelector(`.card[data-iso="${currentIso}"]`);
+      const url = card ? card.querySelector(".buy-btn").dataset.url : "";
+      const action = document.getElementById("resAction");
+      action.innerHTML = "";
+      if (url) {
+        const a = document.createElement("a");
+        a.className = "btn";
+        a.href = url;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.textContent = t("continueProvider");
+        action.appendChild(a);
+      } else {
+        action.textContent = t("noLink", { c: countryName(currentIso) });
+      }
+
+      form.hidden = true;
+      document.getElementById("buyResult").hidden = false;
+    });
+
+    // ---------- Schimbarea limbii ----------
+    function setLang(l) {
+      lang = l;
+      try { localStorage.setItem("tollgo_lang", l); } catch (e) {}
+      applyStatic();
+      renderCards();
+      fillRegOptions();
+      if (currentIso) {
+        updateDialogTitle();
+        fillPeriodOptions();
+      }
+    }
+    document.querySelectorAll(".lang-btn").forEach(b => {
+      b.addEventListener("click", () => setLang(b.dataset.lang));
+    });
+
+    // ---------- Harta ----------
+    function showMapError() {
+      document.getElementById("map").hidden = true;
+      document.getElementById("mapError").hidden = false;
+    }
+
+    // Doar țările europene (cod ISO-3); restul lumii nu se desenează
+    const EUROPE = new Set(["ALB","AND","AUT","BLR","BEL","BIH","BGR","HRV","CYP","CZE","DNK","EST","FIN","FRA","DEU","GRC","HUN","ISL","IRL","ITA","LVA","LIE","LTU","LUX","MLT","MDA","MCO","MNE","NLD","MKD","NOR","POL","PRT","ROU","SMR","SRB","SVK","SVN","ESP","SWE","CHE","UKR","GBR","VAT"]);
+    const EUROPE_BOUNDS = [[34, -25], [71, 42]];
+    // Vizualizarea initială se încadrează pe cele 8 țări cu vignetă
+    const VIGNETTE_BOUNDS = [[41.0, 5.8], [51.2, 29.9]];
+
+    if (window.L) {
+      const map = L.map("map", {
+        minZoom: 4,
+        maxZoom: 7,
+        attributionControl: false,
+        scrollWheelZoom: false, // scroll-ul paginii nu mai mărește harta din greșeală
+        maxBounds: EUROPE_BOUNDS,
+        maxBoundsViscosity: 1.0
+      }).fitBounds(VIGNETTE_BOUNDS, { padding: [12, 12] });
+
+      fetch("https://cdn.jsdelivr.net/gh/johan/world.geo.json@master/countries.geo.json")
+        .then(r => r.json())
+        .then(geo => {
+          geo.features = geo.features.filter(f => EUROPE.has(f.id));
+          L.geoJSON(geo, {
+            style: f => ISO2[f.id]
+              ? { fillColor: "#1a73e8", fillOpacity: 0.75, color: "#ffffff", weight: 1.5 }
+              : { fillColor: "#c9d1de", fillOpacity: 0.6, color: "#ffffff", weight: 1 },
+            onEachFeature: (f, layer) => {
+              if (!ISO2[f.id]) return;
+              layer.bindTooltip(() => `<div class="tip">${flagSvg(f.id)}<b>${countryName(f.id)}</b></div>`, { sticky: true });
+              layer.on({
+                mouseover: e => e.target.setStyle({ fillOpacity: 0.95 }),
+                mouseout: e => e.target.setStyle({ fillOpacity: 0.75 }),
+                click: () => openForm(f.id)
+              });
+            }
+          }).addTo(map);
+        })
+        .catch(showMapError);
+    } else {
+      showMapError();
+    }
+
+    // ---------- Pornire ----------
+    applyStatic();
+    renderCards();
+    fillRegOptions();
+  </script>
+</body>
+</html>
