@@ -75,6 +75,12 @@
     .btn-ghost { background: none; border: 1px solid #c9d1de; border-radius: 8px; padding: 10px 14px; font: inherit; cursor: pointer; color: var(--text); }
     .form-error { color: #b42318; font-size: 0.92rem; font-weight: 600; margin: 0 0 8px; }
     .test-note { font-size: 0.85rem; color: var(--muted); margin-top: 14px; }
+    .buy-dialog [hidden] { display: none !important; }
+    .order-status { margin-top: 14px; padding: 12px 14px; background: #f3f6fb; border-radius: 10px; }
+    .order-status p { margin: 6px 0 0; }
+    .order-status-line[data-status="issued"] { color: #157347; font-weight: 600; }
+    .order-status-line[data-status="failed"], .order-status-line[data-status="cancelled"] { color: #b42318; font-weight: 600; }
+    .pay-slot { margin-top: 12px; }
     .site-footer { background: #03304f; color: #b9c9dc; font-size: 0.88rem; text-align: center; padding: 48px 0 40px; margin-top: 48px; }
     .site-footer .cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px 28px; text-align: left; padding-bottom: 28px; margin-bottom: 28px; border-bottom: 1px solid rgba(255,255,255,.18); }
     .site-footer .cta h2 { color: #fff; margin: 0 0 6px; font-size: 1.5rem; }
@@ -270,6 +276,12 @@
       <label><span data-i18n="fPlate">Numărul de înmatriculare</span>
         <input id="plate" type="text" maxlength="15" autocomplete="off" autocapitalize="characters" data-i18n-attr="placeholder:plateHint" placeholder="ex: B 123 ABC">
       </label>
+      <label><span data-i18n="fCategory">Categoria vehiculului</span>
+        <select id="vehicleCategory"></select>
+      </label>
+      <label id="emissionLabel" hidden><span data-i18n="fEmission">Norma de emisii</span>
+        <select id="emissionClass"></select>
+      </label>
       <label><span data-i18n="fEmail">E-mail pentru confirmare</span>
         <input id="email" type="email" autocomplete="email" data-i18n-attr="placeholder:emailHint" placeholder="nume@exemplu.ro">
       </label>
@@ -291,9 +303,11 @@
          <span data-i18n="resStart">Valabilă de la:</span> <strong id="resStart"></strong><br>
          <span data-i18n="resReg">Țara de înmatriculare:</span> <strong id="resReg"></strong><br>
          <span data-i18n="resPlate">Numărul:</span> <strong id="resPlate"></strong><br>
-         <span data-i18n="resEmail">E-mail:</span> <strong id="resEmail"></strong></p>
+         <span data-i18n="resCategory">Categorie:</span> <strong id="resCategory"></strong><br>
+         <span data-i18n="resEmail">E-mail:</span> <strong id="resEmail"></strong>
+         <span id="resPriceRow" hidden><br><span data-i18n="resPrice">Preț:</span> <strong id="resPrice"></strong></span></p>
       <div id="resAction"></div>
-      <p class="test-note" data-i18n="testNote">Versiune de test: datele nu sunt salvate și nu se trimite niciun e-mail de confirmare.</p>
+      <p class="test-note" id="testNote" data-i18n="testNote">Versiune de test: datele nu sunt salvate și nu se trimite niciun e-mail de confirmare.</p>
       <div class="actions">
         <button type="button" class="btn-ghost" id="editBuy" data-i18n="editBtn">Modifică</button>
         <button type="button" class="btn-ghost close-dialog" data-i18n="closeBtn">Închide</button>
@@ -302,6 +316,9 @@
   </dialog>
 
   <script src="lang.js"></script>
+  <script src="integration/i18n-extra.js"></script>
+  <script src="integration/config.js"></script>
+  <script src="integration/adapters.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     const LANGS = ["ro", "de", "cs", "sk", "hu", "sl", "bg", "en"];
@@ -426,7 +443,33 @@
     const regSel = document.getElementById("regCountry");
     const perSel = document.getElementById("period");
     const startInput = document.getElementById("startDate");
+    const catSel = document.getElementById("vehicleCategory");
+    const emiSel = document.getElementById("emissionClass");
+    const emiLabel = document.getElementById("emissionLabel");
+    const EMISSION_COUNTRIES = ["ROU"]; // prețul depinde de norma de emisii (din 1 oct. 2026)
+    const CATEGORIES = { car: "catCar", motorcycle: "catMotorcycle" };
+    const EMISSIONS = ["euro6", "euro5", "euro4", "euro3", "older", "electric"];
     let currentIso = null;
+    let activeIntegration = null;
+
+    function disposeIntegration() {
+      if (activeIntegration) { activeIntegration.dispose(); activeIntegration = null; }
+    }
+
+    function fillCategoryOptions() {
+      const prev = catSel.value;
+      catSel.innerHTML = "";
+      catSel.add(new Option(t("chooseCategory"), ""));
+      Object.keys(CATEGORIES).forEach(k => catSel.add(new Option(t(CATEGORIES[k]), k)));
+      catSel.value = prev;
+    }
+    function fillEmissionOptions() {
+      const prev = emiSel.value;
+      emiSel.innerHTML = "";
+      emiSel.add(new Option(t("chooseEmission"), ""));
+      EMISSIONS.forEach(k => emiSel.add(new Option(t("emi_" + k), k)));
+      emiSel.value = prev;
+    }
 
     function dateISO(offsetDays) {
       const d = new Date();
@@ -476,6 +519,10 @@
       fillPeriodOptions();
       form.reset();
       fillRegOptions();
+      fillCategoryOptions();
+      fillEmissionOptions();
+      emiLabel.hidden = !EMISSION_COUNTRIES.includes(iso);
+      disposeIntegration();
       form.hidden = false;
       document.getElementById("buyResult").hidden = true;
       formError.hidden = true;
@@ -484,7 +531,9 @@
     }
 
     document.querySelectorAll(".close-dialog").forEach(b => b.addEventListener("click", () => dlg.close()));
+    dlg.addEventListener("close", disposeIntegration);
     document.getElementById("editBuy").addEventListener("click", () => {
+      disposeIntegration();
       form.hidden = false;
       document.getElementById("buyResult").hidden = true;
     });
@@ -508,6 +557,8 @@
       }
       else if (!reg) msg = t("errCountry");
       else if (!/^[A-Z0-9][A-Z0-9 -]{1,13}[A-Z0-9]$/.test(plate)) msg = t("errPlate");
+      else if (!catSel.value) msg = t("errCategory");
+      else if (EMISSION_COUNTRIES.includes(currentIso) && !emiSel.value) msg = t("errEmission");
       else if (!emailInput.checkValidity()) msg = t("errEmail");
       else if (!agree) msg = t("errAgree");
       if (msg) {
@@ -524,21 +575,33 @@
       document.getElementById("resPlate").textContent = plate;
       document.getElementById("resEmail").textContent = email;
 
+      document.getElementById("resCategory").textContent = catSel.options[catSel.selectedIndex].text;
+      document.getElementById("resPriceRow").hidden = true;
+      document.getElementById("testNote").hidden = !TollgoIntegration.isSandbox();
+
+      const order = {
+        country: currentIso, period: perSel.value, startDate: start, regCountry: reg, plate,
+        vehicleCategory: catSel.value,
+        emissionClass: EMISSION_COUNTRIES.includes(currentIso) ? emiSel.value : undefined,
+        email, lang
+      };
       const card = document.querySelector(`.card[data-iso="${currentIso}"]`);
-      const url = card ? card.querySelector(".buy-btn").dataset.url : "";
       const action = document.getElementById("resAction");
-      action.innerHTML = "";
-      if (url) {
-        const a = document.createElement("a");
-        a.className = "btn";
-        a.href = url;
-        a.target = "_blank";
-        a.rel = "noopener";
-        a.textContent = t("continueProvider");
-        action.appendChild(a);
-      } else {
-        action.textContent = t("noLink", { c: countryName(currentIso) });
-      }
+      disposeIntegration();
+      activeIntegration = TollgoIntegration.render(order, action, {
+        t,
+        countryName: countryName(currentIso),
+        fallbackUrl: card ? card.querySelector(".buy-btn").dataset.url : ""
+      });
+
+      // Prețul real (dacă providerul îl oferă); nu blochează fluxul.
+      TollgoIntegration.quote(order).then(q => {
+        if (!q || q.price == null) return;
+        let txt = String(q.price);
+        try { txt = new Intl.NumberFormat(lang, { style: "currency", currency: q.currency || "EUR" }).format(q.price); } catch (e) {}
+        document.getElementById("resPrice").textContent = txt;
+        document.getElementById("resPriceRow").hidden = false;
+      });
 
       form.hidden = true;
       document.getElementById("buyResult").hidden = false;
@@ -551,6 +614,8 @@
       applyStatic();
       renderCards();
       fillRegOptions();
+      fillCategoryOptions();
+      fillEmissionOptions();
       if (currentIso) {
         updateDialogTitle();
         fillPeriodOptions();
@@ -607,6 +672,7 @@
     }
 
     // ---------- Pornire ----------
+    TollgoIntegration.captureAttribution();
     applyStatic();
     renderCards();
     fillRegOptions();
