@@ -6,12 +6,13 @@
 (function (root) {
   "use strict";
   const company = {
-    name: "",      // denumirea completă, cu forma juridică (ex. „Exemplu S.R.L.”)
-    cui: "",       // cod unic de înregistrare (CUI / CIF)
-    regCom: "",    // nr. de înregistrare la Registrul Comerțului (ex. J40/1234/2020)
+    name: "Fedor & Co SRL",      // denumirea completă, cu forma juridică
+    cui: "48226399",       // cod unic de înregistrare (CUI / CIF), înregistrat la 24.05.2023
+    regCom: "J30/511/24.05.2023",    // nr. de ordine în Registrul Comerțului
+    euid: "ROONRC.J30/511/2023",     // identificator unic la nivel european (EUID)
     vatId: "",     // codul de TVA (ex. RO12345678), dacă firma este plătitoare de TVA
-    address: "",   // sediul social
-    email: "",     // adresa pentru întrebări și reclamații
+    address: "Strada Anghel Saligny 32, 440086 Satu Mare, România",   // sediul social
+    email: "contact@tollgo.eu",     // adresa pentru întrebări și reclamații
     phone: "",     // telefon (opțional)
 
     // Treci pe true DOAR după ce un jurist a verificat textele din legal/content.js.

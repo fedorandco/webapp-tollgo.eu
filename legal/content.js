@@ -5,7 +5,7 @@
 (function (root) {
   "use strict";
 
-  const FIELDS = ["name", "cui", "regCom", "vatId", "address", "email", "phone"];
+  const FIELDS = ["name", "cui", "regCom", "euid", "vatId", "address", "email", "phone"];
 
   function esc(s) {
     return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -31,7 +31,7 @@
           id: "date-identificare",
           title: "Date de identificare ale firmei",
           html: `
-<p>Site-ul tollgo.eu este operat de <strong>{{name}}</strong>, CUI {{cui}}, înregistrată la Registrul Comerțului cu nr. {{regCom}}, cu sediul în {{address}}. Cod de TVA: {{vatId}}.</p>
+<p>Site-ul tollgo.eu este operat de <strong>{{name}}</strong>, CUI {{cui}}, înregistrată la Registrul Comerțului cu nr. {{regCom}} (EUID {{euid}}), cu sediul în {{address}}. Cod de TVA: {{vatId}}.</p>
 <p>Contact: e-mail <strong>{{email}}</strong>, telefon {{phone}}.</p>`
         },
         {
@@ -102,7 +102,7 @@
           id: "date-identificare",
           title: "Company identification",
           html: `
-<p>The tollgo.eu website is operated by <strong>{{name}}</strong>, tax ID (CUI) {{cui}}, registered with the Romanian Trade Register under no. {{regCom}}, with its registered office at {{address}}. VAT ID: {{vatId}}.</p>
+<p>The tollgo.eu website is operated by <strong>{{name}}</strong>, tax ID (CUI) {{cui}}, registered with the Romanian Trade Register under no. {{regCom}} (EUID {{euid}}), with its registered office at {{address}}. VAT ID: {{vatId}}.</p>
 <p>Contact: email <strong>{{email}}</strong>, phone {{phone}}.</p>`
         },
         {
