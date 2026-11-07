@@ -1,0 +1,11 @@
+{
+  "name": "webapp-tollgo-eu",
+  "private": true,
+  "version": "0.2.0",
+  "description": "tollgo.eu – interfață pentru vignete, integrare Autopay (redirect / API / iFrame / white-label)",
+  "scripts": {
+    "dev": "node scripts/dev-server.js",
+    "test": "node --test tests/*.test.js",
+    "check:launch": "node scripts/check-launch.js"
+  }
+}

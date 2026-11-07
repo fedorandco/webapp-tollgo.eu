@@ -75,6 +75,12 @@
     .btn-ghost { background: none; border: 1px solid #c9d1de; border-radius: 8px; padding: 10px 14px; font: inherit; cursor: pointer; color: var(--text); }
     .form-error { color: #b42318; font-size: 0.92rem; font-weight: 600; margin: 0 0 8px; }
     .test-note { font-size: 0.85rem; color: var(--muted); margin-top: 14px; }
+    .buy-dialog [hidden] { display: none !important; }
+    .order-status { margin-top: 14px; padding: 12px 14px; background: #f3f6fb; border-radius: 10px; }
+    .order-status p { margin: 6px 0 0; }
+    .order-status-line[data-status="issued"] { color: #157347; font-weight: 600; }
+    .order-status-line[data-status="failed"], .order-status-line[data-status="cancelled"] { color: #b42318; font-weight: 600; }
+    .pay-slot { margin-top: 12px; }
     .site-footer { background: #03304f; color: #b9c9dc; font-size: 0.88rem; text-align: center; padding: 48px 0 40px; margin-top: 48px; }
     .site-footer .cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px 28px; text-align: left; padding-bottom: 28px; margin-bottom: 28px; border-bottom: 1px solid rgba(255,255,255,.18); }
     .site-footer .cta h2 { color: #fff; margin: 0 0 6px; font-size: 1.5rem; }
@@ -82,7 +88,7 @@
     .cta-btn { display: inline-block; background: #22c55e; color: #0b1f12; font-weight: 700; text-decoration: none; padding: 14px 24px; border-radius: 10px; white-space: nowrap; }
     .cta-btn:hover { background: #4ade80; }
     .site-footer .logo-box { display: block; width: fit-content; margin: 0 auto 24px; background: #fff; border-radius: 10px; padding: 8px 14px; }
-    .site-footer .logo-box img { height: 66px; width: auto; display: block; }
+    .site-footer .logo-box img { height: 56px; width: auto; display: block; }
     .legal-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 22px; border-top: 1px solid rgba(255,255,255,.18); padding-top: 22px; margin-bottom: 22px; }
     .legal-links a { color: #e6edf6; text-decoration: none; font-size: 0.95rem; }
     .legal-links a::before { content: "› "; color: #7fa3c7; }
@@ -97,7 +103,7 @@
 <body>
   <header>
     <div class="wrap">
-      <a class="logo" href="#"><img src="logo.jpg" alt="tollgo.eu - European road toll & vignettes" data-i18n-attr="alt:logoAlt" style="height:66px;max-width:100%;width:auto;display:block;background:#fff;border-radius:8px;padding:6px 12px;"></a>
+      <a class="logo" href="#"><img src="logo-tollgo-header.png" width="494" height="140" alt="tollgo.eu - European road toll & vignettes" data-i18n-attr="alt:logoAlt" style="height:56px;max-width:100%;width:auto;display:block;background:#fff;border-radius:8px;padding:6px 14px;"></a>
       <nav>
         <a href="#tari" data-i18n="navCountries">Țări</a>
         <a href="#cum" data-i18n="navHow">Cum funcționează</a>
@@ -194,7 +200,7 @@
     </div>
 
     <div class="notice">
-      <img src="logo.jpg" alt="tollgo.eu" data-i18n-attr="alt:logoAlt">
+      <img src="logo-tollgo-header.png" alt="tollgo.eu" data-i18n-attr="alt:logoAlt">
       <strong data-i18n="noticeLabel">Important:</strong> <span data-i18n="noticeBody">tollgo.eu este un serviciu independent de intermediere. Nu suntem afiliați cu autoritățile rutiere sau cu operatorii naționali de drumuri. Prețurile afișate sunt orientative și pot fi modificate de furnizorul oficial. Verifică întotdeauna prețul și condițiile înainte de cumpărare.</span>
     </div>
 
@@ -239,16 +245,15 @@
         </div>
         <a class="cta-btn" href="#map" data-i18n="ctaButton">Cumpără vigneta</a>
       </div>
-      <span class="logo-box"><img src="logo.jpg" alt="tollgo.eu"></span>
+      <span class="logo-box"><img src="logo-tollgo-header.png" alt="tollgo.eu"></span>
       <nav class="legal-links" aria-label="Legal">
-        <a href="#protectia-datelor" data-i18n="legal1">Protecția datelor și declarația privind protecția datelor</a>
-        <a href="#termeni" data-i18n="legal2">Termeni și condiții generale</a>
-        <a href="#revocare" data-i18n="legal3">Revocare &amp; drept de retragere</a>
-        <a href="#date-identificare" data-i18n="legal4">Date de identificare ale firmei</a>
-        <a href="#informatii-consumatori" data-i18n="legal5">Informații pentru consumatori</a>
-        <a href="#protectia-anularii" data-i18n="legal6">Informații despre protecția anulării</a>
-        <a href="#newsletter" data-i18n="legal7">Newsletter</a>
+        <a href="legal.html#protectia-datelor" data-i18n="legal1">Protecția datelor și declarația privind protecția datelor</a>
+        <a href="legal.html#termeni" data-i18n="legal2">Termeni și condiții generale</a>
+        <a href="legal.html#revocare" data-i18n="legal3">Revocare &amp; drept de retragere</a>
+        <a href="legal.html#date-identificare" data-i18n="legal4">Date de identificare ale firmei</a>
+        <a href="legal.html#informatii-consumatori" data-i18n="legal5">Informații pentru consumatori</a>
       </nav>
+      <p id="companyLine" hidden></p>
       <p data-i18n="copyright">© 2026 tollgo.eu. Toate drepturile rezervate.</p>
       <p data-i18n="contactLine">Pentru întrebări sau reclamații, scrie-ne la adresa de contact [de completat].</p>
       <p class="anpc-box"><span data-i18n="consumerLabel">Protecția consumatorilor:</span> <a href="https://www.anpc.ro/" target="_blank" rel="noopener">ANPC – Autoritatea Națională pentru Protecția Consumatorilor</a></p>
@@ -270,12 +275,18 @@
       <label><span data-i18n="fPlate">Numărul de înmatriculare</span>
         <input id="plate" type="text" maxlength="15" autocomplete="off" autocapitalize="characters" data-i18n-attr="placeholder:plateHint" placeholder="ex: B 123 ABC">
       </label>
+      <label><span data-i18n="fCategory">Categoria vehiculului</span>
+        <select id="vehicleCategory"></select>
+      </label>
+      <label id="emissionLabel" hidden><span data-i18n="fEmission">Norma de emisii</span>
+        <select id="emissionClass"></select>
+      </label>
       <label><span data-i18n="fEmail">E-mail pentru confirmare</span>
         <input id="email" type="email" autocomplete="email" data-i18n-attr="placeholder:emailHint" placeholder="nume@exemplu.ro">
       </label>
       <label class="check">
         <input id="agree" type="checkbox">
-        <span><span data-i18n="agreePre">Confirm că am completat corect datele și sunt de acord cu </span><a href="#termeni" data-i18n="agreeLink">termenii și condițiile</a><span data-i18n="agreePost">.</span></span>
+        <span><span data-i18n="agreePre">Confirm că am completat corect datele și sunt de acord cu </span><a href="legal.html#termeni" target="_blank" rel="noopener" data-i18n="agreeLink">termenii și condițiile</a><span data-i18n="agreePost">.</span></span>
       </label>
       <p class="form-error" id="formError" hidden></p>
       <div class="actions">
@@ -291,9 +302,11 @@
          <span data-i18n="resStart">Valabilă de la:</span> <strong id="resStart"></strong><br>
          <span data-i18n="resReg">Țara de înmatriculare:</span> <strong id="resReg"></strong><br>
          <span data-i18n="resPlate">Numărul:</span> <strong id="resPlate"></strong><br>
-         <span data-i18n="resEmail">E-mail:</span> <strong id="resEmail"></strong></p>
+         <span data-i18n="resCategory">Categorie:</span> <strong id="resCategory"></strong><br>
+         <span data-i18n="resEmail">E-mail:</span> <strong id="resEmail"></strong>
+         <span id="resPriceRow" hidden><br><span data-i18n="resPrice">Preț:</span> <strong id="resPrice"></strong></span></p>
       <div id="resAction"></div>
-      <p class="test-note" data-i18n="testNote">Versiune de test: datele nu sunt salvate și nu se trimite niciun e-mail de confirmare.</p>
+      <p class="test-note" id="testNote" data-i18n="testNote">Versiune de test: datele nu sunt salvate și nu se trimite niciun e-mail de confirmare.</p>
       <div class="actions">
         <button type="button" class="btn-ghost" id="editBuy" data-i18n="editBtn">Modifică</button>
         <button type="button" class="btn-ghost close-dialog" data-i18n="closeBtn">Închide</button>
@@ -302,6 +315,10 @@
   </dialog>
 
   <script src="lang.js"></script>
+  <script src="integration/i18n-extra.js"></script>
+  <script src="integration/config.js"></script>
+  <script src="integration/adapters.js"></script>
+  <script src="legal/company.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     const LANGS = ["ro", "de", "cs", "sk", "hu", "sl", "bg", "en"];
@@ -337,13 +354,17 @@
       SVN: "https://evinjeta.dars.si"
     };
 
-    // Steaguri simplificate, desenate în SVG (fără stemele Sloveniei și Slovaciei)
+    // Steaguri simplificate, desenate în SVG (Slovacia fără stemă; Slovenia cu stema simplificată, ca să nu semene cu steagul Rusiei)
     const FLAG_PARTS = {
       AUT: '<rect width="30" height="20" fill="#ED2939"/><rect y="6.67" width="30" height="6.66" fill="#fff"/>',
       CZE: '<rect width="30" height="10" fill="#fff"/><rect y="10" width="30" height="10" fill="#D7141A"/><polygon points="0,0 15,10 0,20" fill="#11457E"/>',
       SVK: '<rect width="30" height="6.67" fill="#fff"/><rect y="6.67" width="30" height="6.66" fill="#0B4EA2"/><rect y="13.33" width="30" height="6.67" fill="#EE1C25"/>',
       HUN: '<rect width="30" height="6.67" fill="#CE2939"/><rect y="6.67" width="30" height="6.66" fill="#fff"/><rect y="13.33" width="30" height="6.67" fill="#477050"/>',
-      SVN: '<rect width="30" height="6.67" fill="#fff"/><rect y="6.67" width="30" height="6.66" fill="#005DA4"/><rect y="13.33" width="30" height="6.67" fill="#ED1C24"/>',
+      SVN: '<rect width="30" height="6.67" fill="#fff"/><rect y="6.67" width="30" height="6.66" fill="#005DA4"/><rect y="13.33" width="30" height="6.67" fill="#ED1C24"/>' +
+        '<path d="M5 3.5H11V7.6C11 9.9 8 11.4 8 11.4C8 11.4 5 9.9 5 7.6Z" fill="#005DA4" stroke="#ED1C24" stroke-width=".5"/>' +
+        '<polygon points="5.5,9 6.9,6.8 7.6,7.7 8.3,6.2 10.5,9" fill="#fff"/>' +
+        '<path d="M6 9.7q.5-.5 1 0t1 0t1 0t1 0" fill="none" stroke="#fff" stroke-width=".35"/>' +
+        '<circle cx="8" cy="4.4" r=".45" fill="#FFDD00"/><circle cx="6.7" cy="5.3" r=".45" fill="#FFDD00"/><circle cx="9.3" cy="5.3" r=".45" fill="#FFDD00"/>',
       CHE: '<rect width="30" height="20" fill="#D52B1E"/><rect x="12.5" y="4" width="5" height="12" fill="#fff"/><rect x="9" y="7.5" width="12" height="5" fill="#fff"/>',
       BGR: '<rect width="30" height="6.67" fill="#fff"/><rect y="6.67" width="30" height="6.66" fill="#00966E"/><rect y="13.33" width="30" height="6.67" fill="#D62612"/>',
       ROU: '<rect width="10" height="20" fill="#002B7F"/><rect x="10" width="10" height="20" fill="#FCD116"/><rect x="20" width="10" height="20" fill="#CE1126"/>'
@@ -388,6 +409,21 @@
         });
       });
       document.querySelectorAll(".lang-btn").forEach(b => b.classList.toggle("active", b.dataset.lang === lang));
+      applyCompany();
+    }
+
+    // Datele firmei din legal/company.js: contactul și linia de identificare din subsol.
+    // Câmpurile necompletate lasă textul implicit neschimbat.
+    function applyCompany() {
+      const c = window.TOLLGO_COMPANY || {};
+      const contact = document.querySelector('[data-i18n="contactLine"]');
+      if (contact && c.email) contact.textContent = t("contactLineFilled", { email: c.email });
+      const line = document.getElementById("companyLine");
+      if (line) {
+        const parts = [c.name, c.cui && "CUI " + c.cui, c.address].filter(Boolean);
+        line.textContent = parts.join(" · ");
+        line.hidden = parts.length === 0;
+      }
     }
 
     // ---------- Carduri ----------
@@ -426,7 +462,33 @@
     const regSel = document.getElementById("regCountry");
     const perSel = document.getElementById("period");
     const startInput = document.getElementById("startDate");
+    const catSel = document.getElementById("vehicleCategory");
+    const emiSel = document.getElementById("emissionClass");
+    const emiLabel = document.getElementById("emissionLabel");
+    const EMISSION_COUNTRIES = ["ROU"]; // prețul depinde de norma de emisii (din 1 oct. 2026)
+    const CATEGORIES = { car: "catCar", motorcycle: "catMotorcycle" };
+    const EMISSIONS = ["euro6", "euro5", "euro4", "euro3", "older", "electric"];
     let currentIso = null;
+    let activeIntegration = null;
+
+    function disposeIntegration() {
+      if (activeIntegration) { activeIntegration.dispose(); activeIntegration = null; }
+    }
+
+    function fillCategoryOptions() {
+      const prev = catSel.value;
+      catSel.innerHTML = "";
+      catSel.add(new Option(t("chooseCategory"), ""));
+      Object.keys(CATEGORIES).forEach(k => catSel.add(new Option(t(CATEGORIES[k]), k)));
+      catSel.value = prev;
+    }
+    function fillEmissionOptions() {
+      const prev = emiSel.value;
+      emiSel.innerHTML = "";
+      emiSel.add(new Option(t("chooseEmission"), ""));
+      EMISSIONS.forEach(k => emiSel.add(new Option(t("emi_" + k), k)));
+      emiSel.value = prev;
+    }
 
     function dateISO(offsetDays) {
       const d = new Date();
@@ -476,6 +538,10 @@
       fillPeriodOptions();
       form.reset();
       fillRegOptions();
+      fillCategoryOptions();
+      fillEmissionOptions();
+      emiLabel.hidden = !EMISSION_COUNTRIES.includes(iso);
+      disposeIntegration();
       form.hidden = false;
       document.getElementById("buyResult").hidden = true;
       formError.hidden = true;
@@ -484,7 +550,9 @@
     }
 
     document.querySelectorAll(".close-dialog").forEach(b => b.addEventListener("click", () => dlg.close()));
+    dlg.addEventListener("close", disposeIntegration);
     document.getElementById("editBuy").addEventListener("click", () => {
+      disposeIntegration();
       form.hidden = false;
       document.getElementById("buyResult").hidden = true;
     });
@@ -508,6 +576,8 @@
       }
       else if (!reg) msg = t("errCountry");
       else if (!/^[A-Z0-9][A-Z0-9 -]{1,13}[A-Z0-9]$/.test(plate)) msg = t("errPlate");
+      else if (!catSel.value) msg = t("errCategory");
+      else if (EMISSION_COUNTRIES.includes(currentIso) && !emiSel.value) msg = t("errEmission");
       else if (!emailInput.checkValidity()) msg = t("errEmail");
       else if (!agree) msg = t("errAgree");
       if (msg) {
@@ -524,21 +594,33 @@
       document.getElementById("resPlate").textContent = plate;
       document.getElementById("resEmail").textContent = email;
 
+      document.getElementById("resCategory").textContent = catSel.options[catSel.selectedIndex].text;
+      document.getElementById("resPriceRow").hidden = true;
+      document.getElementById("testNote").hidden = !TollgoIntegration.isSandbox();
+
+      const order = {
+        country: currentIso, period: perSel.value, startDate: start, regCountry: reg, plate,
+        vehicleCategory: catSel.value,
+        emissionClass: EMISSION_COUNTRIES.includes(currentIso) ? emiSel.value : undefined,
+        email, lang
+      };
       const card = document.querySelector(`.card[data-iso="${currentIso}"]`);
-      const url = card ? card.querySelector(".buy-btn").dataset.url : "";
       const action = document.getElementById("resAction");
-      action.innerHTML = "";
-      if (url) {
-        const a = document.createElement("a");
-        a.className = "btn";
-        a.href = url;
-        a.target = "_blank";
-        a.rel = "noopener";
-        a.textContent = t("continueProvider");
-        action.appendChild(a);
-      } else {
-        action.textContent = t("noLink", { c: countryName(currentIso) });
-      }
+      disposeIntegration();
+      activeIntegration = TollgoIntegration.render(order, action, {
+        t,
+        countryName: countryName(currentIso),
+        fallbackUrl: card ? card.querySelector(".buy-btn").dataset.url : ""
+      });
+
+      // Prețul real (dacă providerul îl oferă); nu blochează fluxul.
+      TollgoIntegration.quote(order).then(q => {
+        if (!q || q.price == null) return;
+        let txt = String(q.price);
+        try { txt = new Intl.NumberFormat(lang, { style: "currency", currency: q.currency || "EUR" }).format(q.price); } catch (e) {}
+        document.getElementById("resPrice").textContent = txt;
+        document.getElementById("resPriceRow").hidden = false;
+      });
 
       form.hidden = true;
       document.getElementById("buyResult").hidden = false;
@@ -551,6 +633,8 @@
       applyStatic();
       renderCards();
       fillRegOptions();
+      fillCategoryOptions();
+      fillEmissionOptions();
       if (currentIso) {
         updateDialogTitle();
         fillPeriodOptions();
@@ -607,6 +691,7 @@
     }
 
     // ---------- Pornire ----------
+    TollgoIntegration.captureAttribution();
     applyStatic();
     renderCards();
     fillRegOptions();
