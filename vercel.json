@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/((?!logo-tollgo-header\\.png|robots\\.txt).*)", "destination": "/coming-soon.html" }
+  ],
+  "headers": [
+    { "source": "/(.*)", "headers": [ { "key": "X-Robots-Tag", "value": "noindex, nofollow" } ] }
+  ]
+}
