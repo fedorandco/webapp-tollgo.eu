@@ -247,14 +247,13 @@
       </div>
       <span class="logo-box"><img src="logo.jpg" alt="tollgo.eu"></span>
       <nav class="legal-links" aria-label="Legal">
-        <a href="#protectia-datelor" data-i18n="legal1">Protecția datelor și declarația privind protecția datelor</a>
-        <a href="#termeni" data-i18n="legal2">Termeni și condiții generale</a>
-        <a href="#revocare" data-i18n="legal3">Revocare &amp; drept de retragere</a>
-        <a href="#date-identificare" data-i18n="legal4">Date de identificare ale firmei</a>
-        <a href="#informatii-consumatori" data-i18n="legal5">Informații pentru consumatori</a>
-        <a href="#protectia-anularii" data-i18n="legal6">Informații despre protecția anulării</a>
-        <a href="#newsletter" data-i18n="legal7">Newsletter</a>
+        <a href="legal.html#protectia-datelor" data-i18n="legal1">Protecția datelor și declarația privind protecția datelor</a>
+        <a href="legal.html#termeni" data-i18n="legal2">Termeni și condiții generale</a>
+        <a href="legal.html#revocare" data-i18n="legal3">Revocare &amp; drept de retragere</a>
+        <a href="legal.html#date-identificare" data-i18n="legal4">Date de identificare ale firmei</a>
+        <a href="legal.html#informatii-consumatori" data-i18n="legal5">Informații pentru consumatori</a>
       </nav>
+      <p id="companyLine" hidden></p>
       <p data-i18n="copyright">© 2026 tollgo.eu. Toate drepturile rezervate.</p>
       <p data-i18n="contactLine">Pentru întrebări sau reclamații, scrie-ne la adresa de contact [de completat].</p>
       <p class="anpc-box"><span data-i18n="consumerLabel">Protecția consumatorilor:</span> <a href="https://www.anpc.ro/" target="_blank" rel="noopener">ANPC – Autoritatea Națională pentru Protecția Consumatorilor</a></p>
@@ -287,7 +286,7 @@
       </label>
       <label class="check">
         <input id="agree" type="checkbox">
-        <span><span data-i18n="agreePre">Confirm că am completat corect datele și sunt de acord cu </span><a href="#termeni" data-i18n="agreeLink">termenii și condițiile</a><span data-i18n="agreePost">.</span></span>
+        <span><span data-i18n="agreePre">Confirm că am completat corect datele și sunt de acord cu </span><a href="legal.html#termeni" target="_blank" rel="noopener" data-i18n="agreeLink">termenii și condițiile</a><span data-i18n="agreePost">.</span></span>
       </label>
       <p class="form-error" id="formError" hidden></p>
       <div class="actions">
@@ -319,6 +318,7 @@
   <script src="integration/i18n-extra.js"></script>
   <script src="integration/config.js"></script>
   <script src="integration/adapters.js"></script>
+  <script src="legal/company.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     const LANGS = ["ro", "de", "cs", "sk", "hu", "sl", "bg", "en"];
@@ -409,6 +409,21 @@
         });
       });
       document.querySelectorAll(".lang-btn").forEach(b => b.classList.toggle("active", b.dataset.lang === lang));
+      applyCompany();
+    }
+
+    // Datele firmei din legal/company.js: contactul și linia de identificare din subsol.
+    // Câmpurile necompletate lasă textul implicit neschimbat.
+    function applyCompany() {
+      const c = window.TOLLGO_COMPANY || {};
+      const contact = document.querySelector('[data-i18n="contactLine"]');
+      if (contact && c.email) contact.textContent = t("contactLineFilled", { email: c.email });
+      const line = document.getElementById("companyLine");
+      if (line) {
+        const parts = [c.name, c.cui && "CUI " + c.cui, c.address].filter(Boolean);
+        line.textContent = parts.join(" · ");
+        line.hidden = parts.length === 0;
+      }
     }
 
     // ---------- Carduri ----------

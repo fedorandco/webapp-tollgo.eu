@@ -1,6 +1,7 @@
 // Texte noi pentru integrare. Se încarcă după lang.js. Limbile fără traducere aici (cs, sk,
 // hu, sl, bg) folosesc automat engleza (vezi funcția t() din index.html).
 Object.assign(I18N.ro, {
+  contactLineFilled: "Pentru întrebări sau reclamații, scrie-ne la {email}.",
   fCategory: "Categoria vehiculului", chooseCategory: "Alege categoria",
   catCar: "Autoturism (până la 3,5 t)", catMotorcycle: "Motocicletă",
   fEmission: "Norma de emisii (din talon)", chooseEmission: "Alege norma",
@@ -21,6 +22,7 @@ Object.assign(I18N.ro, {
 });
 
 Object.assign(I18N.en, {
+  contactLineFilled: "For questions or complaints, write to us at {email}.",
   fCategory: "Vehicle category", chooseCategory: "Choose category",
   catCar: "Car (up to 3.5 t)", catMotorcycle: "Motorcycle",
   fEmission: "Emission standard (see registration document)", chooseEmission: "Choose standard",
@@ -41,6 +43,7 @@ Object.assign(I18N.en, {
 });
 
 Object.assign(I18N.de, {
+  contactLineFilled: "Bei Fragen oder Beschwerden schreiben Sie uns an {email}.",
   fCategory: "Fahrzeugkategorie", chooseCategory: "Kategorie wählen",
   catCar: "Pkw (bis 3,5 t)", catMotorcycle: "Motorrad",
   fEmission: "Abgasnorm (laut Fahrzeugschein)", chooseEmission: "Norm wählen",

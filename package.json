@@ -5,6 +5,7 @@
   "description": "tollgo.eu – interfață pentru vignete, integrare Autopay (redirect / API / iFrame / white-label)",
   "scripts": {
     "dev": "node scripts/dev-server.js",
-    "test": "node --test tests/*.test.js"
+    "test": "node --test tests/*.test.js",
+    "check:launch": "node scripts/check-launch.js"
   }
 }
