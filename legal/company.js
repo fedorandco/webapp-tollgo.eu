@@ -10,7 +10,7 @@
     cui: "48226399",       // cod unic de înregistrare (CUI / CIF), înregistrat la 24.05.2023
     regCom: "J30/511/24.05.2023",    // nr. de ordine în Registrul Comerțului
     euid: "ROONRC.J30/511/2023",     // identificator unic la nivel european (EUID)
-    vatId: "",     // codul de TVA (ex. RO12345678), dacă firma este plătitoare de TVA
+    vatId: "RO48226399",     // codul de TVA (ex. RO12345678), dacă firma este plătitoare de TVA
     address: "Strada Anghel Saligny 32, 440086 Satu Mare, România",   // sediul social
     email: "contact@tollgo.eu",     // adresa pentru întrebări și reclamații
     phone: "",     // telefon (opțional)
